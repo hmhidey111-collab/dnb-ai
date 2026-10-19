@@ -22,13 +22,14 @@ import logging
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class RevelationPeriod(str, Enum):
     """Period of revelation for a surah or verse."""
+
     MECCAN = "meccan"
     MEDINAN = "medinan"
     UNKNOWN = "unknown"
@@ -37,12 +38,13 @@ class RevelationPeriod(str, Enum):
 @dataclass
 class Theme:
     """A theme in the taxonomy hierarchy."""
+
     id: str
     name: str
     name_arabic: str
     description: str
-    scholarly_definition: Optional[str] = None
-    parent_id: Optional[str] = None
+    scholarly_definition: str | None = None
+    parent_id: str | None = None
     level: int = 0  # 0 = main, 1 = sub, 2 = micro
     keywords: list[str] = field(default_factory=list)
     related_themes: list[str] = field(default_factory=list)
@@ -64,18 +66,20 @@ class Theme:
 @dataclass
 class VerseThemeMapping:
     """Association between a verse and a theme."""
+
     surah: int
     ayah: int
     theme_id: str
     relevance_score: float = 1.0
-    annotation: Optional[str] = None
-    scholarly_notes: Optional[str] = None
+    annotation: str | None = None
+    scholarly_notes: str | None = None
     context_type: str = "primary"  # primary, secondary, tangential
 
 
 @dataclass
 class ThematicSummary:
     """Summary of a theme across the Quran."""
+
     theme_id: str
     total_verses: int
     meccan_verses: int
@@ -308,16 +312,123 @@ SUB_THEMES = [
     ),
 ]
 
-# Surah revelation periods (partial list - expand as needed)
+# Surah revelation periods for all 114 surahs, matching the classification
+# in scripts/build_surah_index.py (single source of truth).
 SURAH_PERIODS: dict[int, RevelationPeriod] = {
-    1: RevelationPeriod.MECCAN,   # Al-Fatiha
+    1: RevelationPeriod.MECCAN,  # Al-Fatihah
     2: RevelationPeriod.MEDINAN,  # Al-Baqarah
     3: RevelationPeriod.MEDINAN,  # Ali 'Imran
     4: RevelationPeriod.MEDINAN,  # An-Nisa
     5: RevelationPeriod.MEDINAN,  # Al-Ma'idah
-    6: RevelationPeriod.MECCAN,   # Al-An'am
-    7: RevelationPeriod.MECCAN,   # Al-A'raf
-    # ... (would be expanded for all 114 surahs)
+    6: RevelationPeriod.MECCAN,  # Al-An'am
+    7: RevelationPeriod.MECCAN,  # Al-A'raf
+    8: RevelationPeriod.MEDINAN,  # Al-Anfal
+    9: RevelationPeriod.MEDINAN,  # At-Tawbah
+    10: RevelationPeriod.MECCAN,  # Yunus
+    11: RevelationPeriod.MECCAN,  # Hud
+    12: RevelationPeriod.MECCAN,  # Yusuf
+    13: RevelationPeriod.MEDINAN,  # Ar-Ra'd
+    14: RevelationPeriod.MECCAN,  # Ibrahim
+    15: RevelationPeriod.MECCAN,  # Al-Hijr
+    16: RevelationPeriod.MECCAN,  # An-Nahl
+    17: RevelationPeriod.MECCAN,  # Al-Isra
+    18: RevelationPeriod.MECCAN,  # Al-Kahf
+    19: RevelationPeriod.MECCAN,  # Maryam
+    20: RevelationPeriod.MECCAN,  # Taha
+    21: RevelationPeriod.MECCAN,  # Al-Anbiya
+    22: RevelationPeriod.MEDINAN,  # Al-Hajj
+    23: RevelationPeriod.MECCAN,  # Al-Mu'minun
+    24: RevelationPeriod.MEDINAN,  # An-Nur
+    25: RevelationPeriod.MECCAN,  # Al-Furqan
+    26: RevelationPeriod.MECCAN,  # Ash-Shu'ara
+    27: RevelationPeriod.MECCAN,  # An-Naml
+    28: RevelationPeriod.MECCAN,  # Al-Qasas
+    29: RevelationPeriod.MECCAN,  # Al-'Ankabut
+    30: RevelationPeriod.MECCAN,  # Ar-Rum
+    31: RevelationPeriod.MECCAN,  # Luqman
+    32: RevelationPeriod.MECCAN,  # As-Sajdah
+    33: RevelationPeriod.MEDINAN,  # Al-Ahzab
+    34: RevelationPeriod.MECCAN,  # Saba
+    35: RevelationPeriod.MECCAN,  # Fatir
+    36: RevelationPeriod.MECCAN,  # Ya-Sin
+    37: RevelationPeriod.MECCAN,  # As-Saffat
+    38: RevelationPeriod.MECCAN,  # Sad
+    39: RevelationPeriod.MECCAN,  # Az-Zumar
+    40: RevelationPeriod.MECCAN,  # Ghafir
+    41: RevelationPeriod.MECCAN,  # Fussilat
+    42: RevelationPeriod.MECCAN,  # Ash-Shura
+    43: RevelationPeriod.MECCAN,  # Az-Zukhruf
+    44: RevelationPeriod.MECCAN,  # Ad-Dukhan
+    45: RevelationPeriod.MECCAN,  # Al-Jathiyah
+    46: RevelationPeriod.MECCAN,  # Al-Ahqaf
+    47: RevelationPeriod.MEDINAN,  # Muhammad
+    48: RevelationPeriod.MEDINAN,  # Al-Fath
+    49: RevelationPeriod.MEDINAN,  # Al-Hujurat
+    50: RevelationPeriod.MECCAN,  # Qaf
+    51: RevelationPeriod.MECCAN,  # Adh-Dhariyat
+    52: RevelationPeriod.MECCAN,  # At-Tur
+    53: RevelationPeriod.MECCAN,  # An-Najm
+    54: RevelationPeriod.MECCAN,  # Al-Qamar
+    55: RevelationPeriod.MEDINAN,  # Ar-Rahman
+    56: RevelationPeriod.MECCAN,  # Al-Waqi'ah
+    57: RevelationPeriod.MEDINAN,  # Al-Hadid
+    58: RevelationPeriod.MEDINAN,  # Al-Mujadila
+    59: RevelationPeriod.MEDINAN,  # Al-Hashr
+    60: RevelationPeriod.MEDINAN,  # Al-Mumtahanah
+    61: RevelationPeriod.MEDINAN,  # As-Saff
+    62: RevelationPeriod.MEDINAN,  # Al-Jumu'ah
+    63: RevelationPeriod.MEDINAN,  # Al-Munafiqun
+    64: RevelationPeriod.MEDINAN,  # At-Taghabun
+    65: RevelationPeriod.MEDINAN,  # At-Talaq
+    66: RevelationPeriod.MEDINAN,  # At-Tahrim
+    67: RevelationPeriod.MECCAN,  # Al-Mulk
+    68: RevelationPeriod.MECCAN,  # Al-Qalam
+    69: RevelationPeriod.MECCAN,  # Al-Haqqah
+    70: RevelationPeriod.MECCAN,  # Al-Ma'arij
+    71: RevelationPeriod.MECCAN,  # Nuh
+    72: RevelationPeriod.MECCAN,  # Al-Jinn
+    73: RevelationPeriod.MECCAN,  # Al-Muzzammil
+    74: RevelationPeriod.MECCAN,  # Al-Muddaththir
+    75: RevelationPeriod.MECCAN,  # Al-Qiyamah
+    76: RevelationPeriod.MEDINAN,  # Al-Insan
+    77: RevelationPeriod.MECCAN,  # Al-Mursalat
+    78: RevelationPeriod.MECCAN,  # An-Naba
+    79: RevelationPeriod.MECCAN,  # An-Nazi'at
+    80: RevelationPeriod.MECCAN,  # 'Abasa
+    81: RevelationPeriod.MECCAN,  # At-Takwir
+    82: RevelationPeriod.MECCAN,  # Al-Infitar
+    83: RevelationPeriod.MECCAN,  # Al-Mutaffifin
+    84: RevelationPeriod.MECCAN,  # Al-Inshiqaq
+    85: RevelationPeriod.MECCAN,  # Al-Buruj
+    86: RevelationPeriod.MECCAN,  # At-Tariq
+    87: RevelationPeriod.MECCAN,  # Al-A'la
+    88: RevelationPeriod.MECCAN,  # Al-Ghashiyah
+    89: RevelationPeriod.MECCAN,  # Al-Fajr
+    90: RevelationPeriod.MECCAN,  # Al-Balad
+    91: RevelationPeriod.MECCAN,  # Ash-Shams
+    92: RevelationPeriod.MECCAN,  # Al-Layl
+    93: RevelationPeriod.MECCAN,  # Ad-Duha
+    94: RevelationPeriod.MECCAN,  # Ash-Sharh
+    95: RevelationPeriod.MECCAN,  # At-Tin
+    96: RevelationPeriod.MECCAN,  # Al-'Alaq
+    97: RevelationPeriod.MECCAN,  # Al-Qadr
+    98: RevelationPeriod.MEDINAN,  # Al-Bayyinah
+    99: RevelationPeriod.MEDINAN,  # Az-Zalzalah
+    100: RevelationPeriod.MECCAN,  # Al-'Adiyat
+    101: RevelationPeriod.MECCAN,  # Al-Qari'ah
+    102: RevelationPeriod.MECCAN,  # At-Takathur
+    103: RevelationPeriod.MECCAN,  # Al-'Asr
+    104: RevelationPeriod.MECCAN,  # Al-Humazah
+    105: RevelationPeriod.MECCAN,  # Al-Fil
+    106: RevelationPeriod.MECCAN,  # Quraysh
+    107: RevelationPeriod.MECCAN,  # Al-Ma'un
+    108: RevelationPeriod.MECCAN,  # Al-Kawthar
+    109: RevelationPeriod.MECCAN,  # Al-Kafirun
+    110: RevelationPeriod.MEDINAN,  # An-Nasr
+    111: RevelationPeriod.MECCAN,  # Al-Masad
+    112: RevelationPeriod.MECCAN,  # Al-Ikhlas
+    113: RevelationPeriod.MECCAN,  # Al-Falaq
+    114: RevelationPeriod.MECCAN,  # An-Nas
 }
 
 
@@ -342,7 +453,7 @@ class ThematicTaxonomy:
                 self._children[theme.parent_id] = []
             self._children[theme.parent_id].append(theme.id)
 
-    def get_theme(self, theme_id: str) -> Optional[Theme]:
+    def get_theme(self, theme_id: str) -> Theme | None:
         """Get a theme by ID."""
         return self._themes.get(theme_id)
 
@@ -390,11 +501,7 @@ class ThematicTaxonomy:
         theme = self._themes.get(theme_id)
         if not theme:
             return []
-        return [
-            self._themes[rid]
-            for rid in theme.related_themes
-            if rid in self._themes
-        ]
+        return [self._themes[rid] for rid in theme.related_themes if rid in self._themes]
 
     def to_dict(self) -> dict[str, Any]:
         """Export taxonomy as a dictionary."""
@@ -407,13 +514,11 @@ class ThematicTaxonomy:
 class ThemeVerseStore:
     """Manages verse-to-theme mappings."""
 
-    def __init__(self, data_file: Optional[str] = None) -> None:
+    def __init__(self, data_file: str | None = None) -> None:
         self._mappings: list[VerseThemeMapping] = []
         self._by_verse: dict[tuple[int, int], list[VerseThemeMapping]] = {}
         self._by_theme: dict[str, list[VerseThemeMapping]] = {}
-        self._data_file = data_file or os.getenv(
-            "THEME_VERSE_DATA", "./data/theme_verses.json"
-        )
+        self._data_file: str = str(data_file or os.getenv("THEME_VERSE_DATA") or "./data/theme_verses.json")
         self._load_data()
 
     def _load_data(self) -> None:
@@ -450,9 +555,7 @@ class ThemeVerseStore:
             self._by_theme[mapping.theme_id] = []
         self._by_theme[mapping.theme_id].append(mapping)
 
-    def get_themes_for_verse(
-        self, surah: int, ayah: int
-    ) -> list[VerseThemeMapping]:
+    def get_themes_for_verse(self, surah: int, ayah: int) -> list[VerseThemeMapping]:
         """Get all theme mappings for a verse."""
         return self._by_verse.get((surah, ayah), [])
 
@@ -460,7 +563,7 @@ class ThemeVerseStore:
         self,
         theme_id: str,
         min_relevance: float = 0.0,
-        context_type: Optional[str] = None,
+        context_type: str | None = None,
     ) -> list[VerseThemeMapping]:
         """Get all verse mappings for a theme with optional filters."""
         mappings = self._by_theme.get(theme_id, [])
@@ -491,13 +594,95 @@ class ThemeVerseStore:
             json.dump(data, f, indent=2)
 
 
+class ReferenceType(str, Enum):
+    """Type of cross-surah reference."""
+
+    REPEATED_STORY = "repeated_story"
+    RELATED_RULING = "related_ruling"
+    SIMILAR_TEACHING = "similar_teaching"
+    PARALLEL_NARRATIVE = "parallel_narrative"
+    THEMATIC_PARALLEL = "thematic_parallel"
+    SCHOLARLY_CROSS_REFERENCE = "scholarly_cross_reference"
+
+
+@dataclass
+class CrossReference:
+    """A bidirectional cross-surah reference between two verses."""
+
+    source_surah: int
+    source_ayah: int
+    target_surah: int
+    target_ayah: int
+    reference_type: ReferenceType = ReferenceType.THEMATIC_PARALLEL
+    context: str | None = None
+    commentary: str | None = None
+    source: str = "manual"
+    weight: float = 1.0
+
+    def key(self) -> tuple[tuple[int, int], tuple[int, int]]:
+        """Canonical key so A->B and B->A are treated as the same reference."""
+        first = (self.source_surah, self.source_ayah)
+        second = (self.target_surah, self.target_ayah)
+        return (first, second) if first < second else (second, first)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "source_surah": self.source_surah,
+            "source_ayah": self.source_ayah,
+            "target_surah": self.target_surah,
+            "target_ayah": self.target_ayah,
+            "reference_type": self.reference_type.value,
+            "context": self.context,
+            "commentary": self.commentary,
+            "source": self.source,
+            "weight": self.weight,
+        }
+
+
+class CrossReferenceStore:
+    """Stores and indexes cross-surah references for efficient retrieval."""
+
+    DEFAULT_REFERENCES = [
+        CrossReference(
+            source_surah=2,
+            source_ayah=255,
+            target_surah=112,
+            target_ayah=1,
+            reference_type=ReferenceType.SIMILAR_TEACHING,
+            context="Both verses affirm Allah's absolute oneness and perfect attributes.",
+            commentary="Classical tafsir literature links Ayat al-Kursi and Surah Al-Ikhlas as complementary statements of tawhid.",
+            source="tafsir",
+        ),
+        CrossReference(
+            source_surah=1,
+            source_ayah=5,
+            target_surah=2,
+            target_ayah=21,
+            reference_type=ReferenceType.THEMATIC_PARALLEL,
+            context="The call to worship Allah alone is repeated throughout the Quran.",
+            commentary="Ibn Kathir notes the parallel between the opening chapter's petition and the explicit command to worship.",
+            source="tafsir",
+        ),
+        CrossReference(
+            source_surah=2,
+            source_ayah=183,
+            target_surah=2,
+            target_ayah=187,
+            reference_type=ReferenceType.RELATED_RULING,
+            context="Both verses establish guidance and rulings for Ramadan fasting.",
+            commentary="The first verse establishes the obligation of fasting, while the second explains its permitted times and boundaries.",
+            source="quran",
+        ),
+    ]
+
+
 class ThematicRetriever:
     """Main API for thematic Quran retrieval."""
 
     def __init__(
         self,
-        taxonomy: Optional[ThematicTaxonomy] = None,
-        verse_store: Optional[ThemeVerseStore] = None,
+        taxonomy: ThematicTaxonomy | None = None,
+        verse_store: ThemeVerseStore | None = None,
     ) -> None:
         self.taxonomy = taxonomy or ThematicTaxonomy()
         self.verse_store = verse_store or ThemeVerseStore()
@@ -565,12 +750,14 @@ class ThematicRetriever:
         for m in mappings:
             theme = self.taxonomy.get_theme(m.theme_id)
             if theme:
-                results.append({
-                    "theme": theme.to_dict(),
-                    "relevance_score": m.relevance_score,
-                    "annotation": m.annotation,
-                    "context_type": m.context_type,
-                })
+                results.append(
+                    {
+                        "theme": theme.to_dict(),
+                        "relevance_score": m.relevance_score,
+                        "annotation": m.annotation,
+                        "context_type": m.context_type,
+                    }
+                )
         return results
 
     def get_theme_cooccurrence(self, theme_id: str) -> dict[str, int]:
@@ -586,9 +773,7 @@ class ThematicRetriever:
 
         return dict(sorted(cooccurrence.items(), key=lambda x: -x[1]))
 
-    def get_chronological_distribution(
-        self, theme_id: str
-    ) -> dict[str, Any]:
+    def get_chronological_distribution(self, theme_id: str) -> dict[str, Any]:
         """Get distribution of theme verses by revelation period."""
         verses = self.verse_store.get_verses_for_theme(theme_id)
         meccan = 0
@@ -612,9 +797,7 @@ class ThematicRetriever:
             "total": len(verses),
         }
 
-    def compare_themes(
-        self, theme_ids: list[str]
-    ) -> dict[str, Any]:
+    def compare_themes(self, theme_ids: list[str]) -> dict[str, Any]:
         """Compare multiple themes by their verse coverage and overlap."""
         themes_data = []
         all_verses: dict[str, set[tuple[int, int]]] = {}
@@ -626,16 +809,18 @@ class ThematicRetriever:
             verses = self.verse_store.get_verses_for_theme(tid)
             verse_set = {(v.surah, v.ayah) for v in verses}
             all_verses[tid] = verse_set
-            themes_data.append({
-                "theme": theme.to_dict(),
-                "verse_count": len(verses),
-                "chronology": self.get_chronological_distribution(tid),
-            })
+            themes_data.append(
+                {
+                    "theme": theme.to_dict(),
+                    "verse_count": len(verses),
+                    "chronology": self.get_chronological_distribution(tid),
+                }
+            )
 
         # Calculate overlap between themes
         overlap = {}
         for i, tid1 in enumerate(theme_ids):
-            for tid2 in theme_ids[i + 1:]:
+            for tid2 in theme_ids[i + 1 :]:
                 if tid1 in all_verses and tid2 in all_verses:
                     shared = len(all_verses[tid1] & all_verses[tid2])
                     overlap[f"{tid1}:{tid2}"] = shared
@@ -645,7 +830,7 @@ class ThematicRetriever:
             "overlap": overlap,
         }
 
-    def generate_theme_summary(self, theme_id: str) -> Optional[ThematicSummary]:
+    def generate_theme_summary(self, theme_id: str) -> ThematicSummary | None:
         """Generate a summary of a theme's presence in the Quran."""
         theme = self.taxonomy.get_theme(theme_id)
         if not theme:
@@ -673,9 +858,7 @@ class ThematicRetriever:
                 if related_theme:
                     related_names.append(related_theme.name)
             if related_names:
-                summary_text += (
-                    f"It frequently co-occurs with themes of {', '.join(related_names)}."
-                )
+                summary_text += f"It frequently co-occurs with themes of {', '.join(related_names)}."
 
         return ThematicSummary(
             theme_id=theme_id,
@@ -692,7 +875,7 @@ class ThematicRetriever:
 # Singleton instance for the application
 # ─────────────────────────────────────────────────────────────────────────────
 
-_retriever: Optional[ThematicRetriever] = None
+_retriever: ThematicRetriever | None = None
 
 
 def get_thematic_retriever() -> ThematicRetriever:

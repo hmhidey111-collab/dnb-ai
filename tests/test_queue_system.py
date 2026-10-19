@@ -1,18 +1,20 @@
 """Tests for queue system (#215)."""
 
 import asyncio
+
 import pytest
+
 from queue_system import (
-    Job,
-    JobStatus,
-    JobPriority,
-    JobResult,
-    JobProgress,
-    RetryConfig,
-    ResourceConstraints,
-    JobHandler,
-    JobQueue,
     InMemoryJobStore,
+    Job,
+    JobHandler,
+    JobPriority,
+    JobProgress,
+    JobQueue,
+    JobResult,
+    JobStatus,
+    ResourceConstraints,
+    RetryConfig,
 )
 
 
@@ -160,7 +162,9 @@ class MockHandler(JobHandler):
 
     @property
     def retry_config(self) -> RetryConfig:
-        return RetryConfig(max_retries=2)
+        # Deterministic and fast so the failure-and-retry test reliably reaches
+        # the dead-letter queue inside its polling window.
+        return RetryConfig(max_retries=2, initial_delay_seconds=0.05, jitter=False)
 
     async def execute(self, job, progress_callback=None):
         await asyncio.sleep(self._execution_time)
@@ -261,11 +265,13 @@ class TestJobQueue:
 
     @pytest.mark.asyncio
     async def test_submit_batch(self, queue):
-        jobs = await queue.submit_batch([
-            {"job_type": "mock_job", "payload": {"i": 1}},
-            {"job_type": "mock_job", "payload": {"i": 2}},
-            {"job_type": "mock_job", "payload": {"i": 3}},
-        ])
+        jobs = await queue.submit_batch(
+            [
+                {"job_type": "mock_job", "payload": {"i": 1}},
+                {"job_type": "mock_job", "payload": {"i": 2}},
+                {"job_type": "mock_job", "payload": {"i": 3}},
+            ]
+        )
         assert len(jobs) == 3
         assert all(j.status == JobStatus.PENDING for j in jobs)
 
